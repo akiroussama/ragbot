@@ -1,0 +1,35 @@
+{
+  "name": "@chatbot-rag/embeddings",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@chatbot-rag/shared": "workspace:*",
+    "openai": "^4.20.0",
+    "langchain": "^0.0.212",
+    "@langchain/openai": "^0.0.14",
+    "@langchain/anthropic": "^0.1.1",
+    "@langchain/cohere": "^0.0.7",
+    "@langchain/huggingface": "^0.0.15",
+    "@anthropic-ai/sdk": "^0.9.1",
+    "cohere-ai": "^7.7.0",
+    "@huggingface/inference": "^2.6.4",
+    "sentence-transformers": "^0.0.5",
+    "tiktoken": "^1.0.11",
+    "p-queue": "^7.4.1",
+    "p-retry": "^6.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "jest": "^29.7.0",
+    "typescript": "^5.3.0"
+  }
+}

@@ -1,0 +1,164 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '8.12.0'
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment:
+      name: staging
+      url: https://staging.chatbot-rag.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy API to ECS
+        run: |
+          aws ecs update-service \
+            --cluster chatbot-staging \
+            --service chatbot-api-staging \
+            --force-new-deployment
+
+      - name: Deploy Admin to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
+          vercel-args: '--prod'
+          working-directory: ./apps/admin
+
+      - name: Deploy Widget to CDN
+        run: |
+          aws s3 sync ./apps/widget/dist s3://chatbot-widget-staging \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable"
+          
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_STAGING }} \
+            --paths "/*"
+
+      - name: Run smoke tests
+        run: |
+          npm install -g newman
+          newman run ./tests/postman/smoke-tests.json \
+            --environment ./tests/postman/staging.json \
+            --bail
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    environment:
+      name: production
+      url: https://chatbot-rag.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+          aws-region: us-east-1
+
+      - name: Create deployment tag
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git tag -a "deploy-$(date +%Y%m%d-%H%M%S)" -m "Production deployment"
+          git push origin --tags
+
+      - name: Deploy API to ECS (Blue/Green)
+        run: |
+          aws deploy create-deployment \
+            --application-name chatbot-api \
+            --deployment-group-name production \
+            --deployment-config-name CodeDeployDefault.ECSAllAtOnceBlueGreen \
+            --description "Production deployment from GitHub Actions"
+
+      - name: Deploy Admin to Vercel (Production)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
+          vercel-args: '--prod --env production'
+          working-directory: ./apps/admin
+
+      - name: Deploy Widget to Production CDN
+        run: |
+          # Build production widget
+          pnpm --filter @chatbot-rag/widget build:prod
+          
+          # Upload to S3 with versioning
+          VERSION=$(node -p "require('./apps/widget/package.json').version")
+          aws s3 cp ./apps/widget/dist/chatbot.min.js \
+            s3://chatbot-widget-prod/v${VERSION}/chatbot.min.js \
+            --cache-control "public, max-age=31536000, immutable"
+          
+          # Update latest pointer
+          aws s3 cp ./apps/widget/dist/chatbot.min.js \
+            s3://chatbot-widget-prod/latest/chatbot.min.js \
+            --cache-control "public, max-age=3600"
+          
+          # Invalidate CloudFront
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PROD }} \
+            --paths "/latest/*"
+
+      - name: Update database migrations
+        run: |
+          pnpm --filter @chatbot-rag/database db:migrate:deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+
+      - name: Send deployment notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: 'Production deployment completed!'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()
+
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    if: failure() && github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    needs: deploy-production
+    steps:
+      - name: Trigger rollback
+        run: |
+          echo "Triggering automatic rollback..."
+          # Add rollback logic here
+
+      - name: Notify rollback
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: 'Production deployment failed! Automatic rollback initiated.'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}

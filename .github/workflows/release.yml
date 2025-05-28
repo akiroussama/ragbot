@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8.12.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: pnpm build
+
+      - name: Generate changelog
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          skip-version-file: true
+          output-file: false
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: ${{ steps.changelog.outputs.clean_changelog }}
+          draft: false
+          prerelease: false
+
+      - name: Build Docker images
+        run: |
+          docker build -t chatbot-api:${{ github.ref_name }} -f apps/api/Dockerfile .
+          docker build -t chatbot-admin:${{ github.ref_name }} -f apps/admin/Dockerfile .
+          docker build -t chatbot-widget:${{ github.ref_name }} -f apps/widget/Dockerfile .
+
+      - name: Push to GitHub Container Registry
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          
+          docker tag chatbot-api:${{ github.ref_name }} ghcr.io/${{ github.repository_owner }}/chatbot-api:${{ github.ref_name }}
+          docker tag chatbot-admin:${{ github.ref_name }} ghcr.io/${{ github.repository_owner }}/chatbot-admin:${{ github.ref_name }}
+          docker tag chatbot-widget:${{ github.ref_name }} ghcr.io/${{ github.repository_owner }}/chatbot-widget:${{ github.ref_name }}
+          
+          docker push ghcr.io/${{ github.repository_owner }}/chatbot-api:${{ github.ref_name }}
+          docker push ghcr.io/${{ github.repository_owner }}/chatbot-admin:${{ github.ref_name }}
+          docker push ghcr.io/${{ github.repository_owner }}/chatbot-widget:${{ github.ref_name }}
+
+      - name: Upload release assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./apps/widget/dist/chatbot.min.js
+          asset_name: chatbot.min.js
+          asset_content_type: application/javascript

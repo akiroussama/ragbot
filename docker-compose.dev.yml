@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: chatbot
+      POSTGRES_PASSWORD: chatbot123
+      POSTGRES_DB: chatbot_rag
+
+  redis:
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass redis123
+
+  qdrant:
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    environment:
+      QDRANT__SERVICE__API_KEY: qdrant123
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: chatbot-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - chatbot-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: chatbot-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@chatbot.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - chatbot-network

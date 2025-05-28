@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chatbot-config
+  namespace: chatbot-rag
+data:
+  NODE_ENV: "production"
+  API_PORT: "3000"
+  API_PREFIX: "/api/v1"
+  LOG_LEVEL: "info"
+  THROTTLE_TTL: "60"
+  THROTTLE_LIMIT: "1000"
+  MAX_FILE_SIZE: "10485760"
+  CHUNK_SIZE: "1000"
+  CHUNK_OVERLAP: "200"
+  EMBEDDING_BATCH_SIZE: "100"
