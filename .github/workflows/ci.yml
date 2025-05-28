@@ -130,7 +130,7 @@ jobs:
         run: pnpm --filter @chatbot-rag/${{ matrix.app }} build
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.app }}-build
           path: |
