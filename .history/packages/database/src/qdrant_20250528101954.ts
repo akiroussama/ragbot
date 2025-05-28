@@ -36,7 +36,20 @@ export class QdrantService {
 
       // Note: Field indexes are created automatically by Qdrant for payload fields
       // when they are first used in filters. Manual index creation is not required
-      // for basic filtering operations.
+      await client.createFieldIndex(collectionName, {
+        field_name: 'project_id',
+        field_schema: 'keyword',
+      });
+
+      await client.createFieldIndex(collectionName, {
+        field_name: 'source_id',
+        field_schema: 'keyword',
+      });
+
+      await client.createFieldIndex(collectionName, {
+        field_name: 'document_id',
+        field_schema: 'keyword',
+      });
     }
   }
 

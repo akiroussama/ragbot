@@ -35,8 +35,58 @@ export class QdrantService {
       });
 
       // Note: Field indexes are created automatically by Qdrant for payload fields
+import { QdrantClient } from '@qdrant/js-client-rest';
+
+export class QdrantService {
+  private static instance: QdrantClient | null = null;
+
+  static getInstance(): QdrantClient {
+    if (!QdrantService.instance) {
+      QdrantService.instance = new QdrantClient({
+        url: process.env.QDRANT_URL || 'http://localhost:6333',
+        apiKey: process.env.QDRANT_API_KEY,
+      });
+    }
+    return QdrantService.instance;
+  }
+
+  static async ensureCollection(
+    collectionName: string,
+    vectorSize: number,
+    distance: 'Cosine' | 'Euclid' | 'Dot' = 'Cosine'
+  ): Promise<void> {
+    const client = QdrantService.getInstance();
+    
+    try {
+      await client.getCollection(collectionName);
+    } catch (error) {
+      // Collection doesn't exist, create it
+      await client.createCollection(collectionName, {
+        vectors: {
+          size: vectorSize,
+          distance,
+        },
+        optimizers_config: {
+          default_segment_number: 2,
+        },
+      });
+
+      // Note: Field indexes are created automatically by Qdrant for payload fields
       // when they are first used in filters. Manual index creation is not required
-      // for basic filtering operations.
+      await client.createFieldIndex(collectionName, {
+        field_name: 'project_id',
+        field_schema: 'keyword',
+      });
+
+      await client.createFieldIndex(collectionName, {
+        field_name: 'source_id',
+        field_schema: 'keyword',
+      });
+
+      await client.createFieldIndex(collectionName, {
+        field_name: 'document_id',
+        field_schema: 'keyword',
+      });
     }
   }
 

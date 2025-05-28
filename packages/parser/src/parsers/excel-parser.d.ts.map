@@ -1,0 +1,1 @@
+{"version":3,"file":"excel-parser.d.ts","sourceRoot":"","sources":["excel-parser.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,MAAM,EAAE,YAAY,EAAE,WAAW,EAAE,MAAM,UAAU,CAAC;AAE7D,qBAAa,WAAY,YAAW,MAAM;IACxC,kBAAkB,WAGhB;IACF,mBAAmB,WAA8B;IAE3C,KAAK,CAAC,MAAM,EAAE,MAAM,EAAE,OAAO,CAAC,EAAE,YAAY,GAAG,OAAO,CAAC,WAAW,CAAC;CAgD1E"}

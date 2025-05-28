@@ -61,7 +61,7 @@ async function main() {
     },
   });
 
-  await prisma.source.create({
+  const websiteSource = await prisma.source.create({
     data: {
       projectId: demoProject.id,
       type: 'website',
@@ -75,7 +75,7 @@ async function main() {
     },
   });
 
-  await prisma.source.create({
+  const documentSource = await prisma.source.create({
     data: {
       projectId: demoProject.id,
       type: 'document',

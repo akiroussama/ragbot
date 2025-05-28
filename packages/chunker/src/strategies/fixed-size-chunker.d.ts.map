@@ -1,0 +1,1 @@
+{"version":3,"file":"fixed-size-chunker.d.ts","sourceRoot":"","sources":["fixed-size-chunker.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,oBAAoB,EAAE,MAAM,iBAAiB,CAAC;AACvD,OAAO,EAAE,KAAK,EAAE,YAAY,EAAE,MAAM,UAAU,CAAC;AAE/C,qBAAa,gBAAiB,SAAQ,oBAAoB;IAClD,KAAK,CAAC,IAAI,EAAE,MAAM,EAAE,OAAO,EAAE,QAAQ,CAAC,YAAY,CAAC,GAAG,OAAO,CAAC,KAAK,EAAE,CAAC;CA4C7E"}
