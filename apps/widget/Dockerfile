@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 
 RUN corepack enable && corepack prepare pnpm@8.12.0 --activate
 RUN apk add --no-cache libc6-compat
