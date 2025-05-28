@@ -1,6 +1,6 @@
 import { chromium, Browser, Page, BrowserContext } from 'playwright';
 import { chromium as chromiumExtra } from 'playwright-extra';
-import StealthPlugin from 'playwright-extra-plugin-stealth';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import PQueue from 'p-queue';
 import { URL } from 'url';
 import { CrawlOptions, CrawlResult, CrawlProgress } from './types';
