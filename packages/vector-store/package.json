@@ -13,12 +13,12 @@
   },
   "dependencies": {
     "@chatbot-rag/shared": "workspace:*",
-    "@nestjs/common": "^10.0.0",
-    "@nestjs/core": "^10.0.0",
+    "@nestjs/common": "^11.1.2",
+    "@nestjs/core": "^11.1.2",
     "@qdrant/js-client-rest": "^1.8.2",
-    "@pinecone-database/pinecone": "^2.0.1",
+    "@pinecone-database/pinecone": "^6.1.0",
     "weaviate-ts-client": "^2.0.0",
-    "chromadb": "^1.8.1",
+    "chromadb": "^2.4.6",
     "pg": "^8.11.3"
   },
   "devDependencies": {
