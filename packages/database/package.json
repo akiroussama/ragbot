@@ -24,7 +24,7 @@
     "bcryptjs": "^2.4.3"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
+    "@types/node": "^24.0.3",
     "@types/bcryptjs": "^2.4.6",
     "prisma": "^5.7.0",
     "tsx": "^4.6.0",
