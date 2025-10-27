@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:25-alpine AS base
 
 RUN corepack enable && corepack prepare pnpm@8.12.0 --activate
 RUN apk add --no-cache libc6-compat
@@ -26,7 +26,7 @@ COPY . .
 RUN pnpm --filter=admin build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:25-alpine AS production
 RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
