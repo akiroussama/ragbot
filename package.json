@@ -26,17 +26,17 @@
     "docker:clean": "docker-compose down -v --remove-orphans"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
+    "@types/node": "^24.9.1",
     "@typescript-eslint/eslint-plugin": "^6.13.0",
     "@typescript-eslint/parser": "^6.13.0",
-    "eslint": "^8.55.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.0.1",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "husky": "^8.0.3",
     "lint-staged": "^15.2.0",
-    "prettier": "^3.1.0",
+    "prettier": "^3.6.2",
     "turbo": "^1.11.0",
-    "typescript": "^5.3.0"
+    "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@8.12.0",
   "engines": {
