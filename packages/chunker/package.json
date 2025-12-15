@@ -13,12 +13,12 @@
   },
   "dependencies": {
     "@chatbot-rag/shared": "workspace:*",
-    "langchain": "^0.0.212",
-    "@langchain/core": "^0.1.5",
-    "@langchain/textsplitters": "^0.0.0",
-    "tiktoken": "^1.0.11",
-    "natural": "^6.10.0",
-    "compromise": "^14.10.0"
+    "langchain": "^1.2.0",
+    "@langchain/core": "^1.1.5",
+    "@langchain/textsplitters": "^1.0.1",
+    "tiktoken": "^1.0.22",
+    "natural": "^8.1.0",
+    "compromise": "^14.14.5"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
